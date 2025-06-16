@@ -1,9 +1,11 @@
 const express = require("express");
 const crypto = require("crypto");
+const { parser } = require("./middleware/customParser");
+const {errorHandler} = require("./middleware/errorHandler.js");
+
 const { validateStudentData, saveData, loadData } = require("./helpers.js");
 const app = express();
-
-app.use(express.json());
+app.use(parser);
 
 let students = [];
 //student class
@@ -36,14 +38,14 @@ app.post("/api/students/", (req, res) => {
 });
 
 app.get("/api/students/", (req, res) => {
-  return res.status(200).json(students);
+  const sorted = [...students].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  return res.status(200).json(sorted);
 });
 
-
-app.use();
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   students = loadData(); //get the data from the students file when starting server
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
